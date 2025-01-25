@@ -1,5 +1,7 @@
 # EtherScan .NET Client
 
+[![NuGet](https://img.shields.io/nuget/v/etherscan.dotnet.client.svg)](https://www.nuget.org/packages/etherscan.dotnet.client/)
+
 A comprehensive .NET client library for interacting with the EtherScan API.
 
 For detailed endpoint information, see the official [EtherScan V2 API Documentation](https://docs.etherscan.io/etherscan-v2).
