@@ -7,7 +7,7 @@
         
         <!-- Package Info -->
         <PackageId>etherscan.dotnet.client</PackageId>
-        <Version>1.0.2</Version>
+        <Version>1.0.4</Version>
         <Authors>Aybars</Authors>
         <Company>AybSoft</Company>
         <Product>Etherscan .NET Client</Product>

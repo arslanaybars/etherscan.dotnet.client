@@ -1,54 +1,38 @@
-name: Auto-version and Publish
+name: Publish to NuGet
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
-  version-and-publish:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        
-    - name: Update Version and Create Tag
-      run: |
-        CSPROJ_FILE="$(find . -name "*.csproj" | head -n 1)"
-        CURRENT_VERSION=$(grep -oP '(?<=<Version>)[^<]+' "$CSPROJ_FILE")
-        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
-        NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
-        sed -i "s|<Version>$CURRENT_VERSION</Version>|<Version>$NEW_VERSION</Version>|" "$CSPROJ_FILE"
-        
-        git config user.name "GitHub Actions"
-        git config user.email "arslanaybars@gmail.com"
-        git add "$CSPROJ_FILE"
-        git commit -m "bump version to $NEW_VERSION"
-        git tag "v$NEW_VERSION"
-        git push && git push --tags
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '9.0.x'
-    
-    - name: Build and Test
-      run: |
-        dotnet restore
-        dotnet build --configuration Release
-        dotnet test --no-restore
-    
-    - name: Pack
-      run: dotnet pack --configuration Release --no-build --output nupkgs
-    
-    - name: Push to NuGet
-      run: |
-        cd nupkgs
-        for f in *.nupkg
-        do
-          dotnet nuget push $f --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
-        done
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build --output nupkgs
+
+      - name: Push to NuGet
+        run: |
+          cd nupkgs
+          for f in *.nupkg
+          do
+            dotnet nuget push $f --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          done
